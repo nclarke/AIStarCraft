@@ -2,14 +2,26 @@ package javabot.AIStarCraft;
 
 import java.awt.Point;
 
+import javabot.JNIBWAPI;
 import javabot.model.Unit;
 import javabot.types.UnitType;
 import javabot.types.UnitType.UnitTypes;
 import javabot.types.UpgradeType.UpgradeTypes;
 import javabot.util.BWColor;
-import "core_reactive.java";
+// Cannot import core reactive, primary and secondary constructors will init the AI core communication
 
 public class build_manager {
+	
+	public build_manager() {
+		//SET UP ALL INTERNAL VARIABLES HERE
+	}
+	
+	public void AI_link_build_manager(JNIBWAPI d_bwapi, core_reactive d_core) {
+		//Here you get your pointers to the other AI cores (JINBWAPI, core, ect ect ect)
+		//The Raynons Raiders code should call this "constructor" after all the other AI parts have
+		// been created.
+		
+	}
 	
         // input: build(UnitTypes.BUILDING.ordinal()) where BUILDING is the building to build
         // will build near similar building types
