@@ -1,10 +1,15 @@
-package javabot;
+package javabot.AIStarCraft;
+
+import java.awt.Point;
 
 import javabot.model.Unit;
+import javabot.types.UnitType;
+import javabot.types.UnitType.UnitTypes;
+import javabot.types.UpgradeType.UpgradeTypes;
 import javabot.util.BWColor;
 import "core_reactive.java";
 
-public class Structure {
+public class build_manager {
 	
         // input: build(UnitTypes.BUILDING.ordinal()) where BUILDING is the building to build
         // will build near similar building types
