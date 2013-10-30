@@ -16,6 +16,7 @@ public class RaynorsRaiders implements BWAPIEventListener {
 
 	int homePositionX, homePositionY, mainMins;
 	
+	/* BroodWar API Harness*/
 	JNIBWAPI bwapi;
 	
 	/* Name AIs here */

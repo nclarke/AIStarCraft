@@ -6,8 +6,6 @@ import javabot.JNIBWAPI;
 import javabot.types.*;
 import javabot.types.UnitType.UnitTypes;
 import javabot.util.*;
-import javabot.leija_overhead.BuildAlerts;
-import javabot.leija_overhead.BuildMode;
 import javabot.model.*;
 
 public class core_reactive {
@@ -61,6 +59,11 @@ public class core_reactive {
 		
 		core_econ_unitsStack.push(UnitTypes.Terran_SCV);
 		core_econ_unitsStack.push(UnitTypes.Terran_SCV);
+		core_econ_unitsStack.push(UnitTypes.Terran_SCV);
+		core_econ_unitsStack.push(UnitTypes.Terran_SCV);
+		core_econ_unitsStack.push(UnitTypes.Terran_Marine);
+		core_econ_unitsStack.push(UnitTypes.Terran_Marine);
+		core_econ_unitsStack.push(UnitTypes.Terran_Marine);
 		core_econ_unitsStack.push(UnitTypes.Terran_Marine);
 	}
 	
