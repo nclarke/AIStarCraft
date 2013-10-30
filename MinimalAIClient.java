@@ -17,88 +17,73 @@ public class MinimalAIClient implements BWAPIEventListener {
 		bwapi.start();
 	} 
 
-        // ex: build(UnitTypes.Terran_Supply_Depot) to build supply depots
-	public void build(UnitTypes bldg) {
-		int Mreq = 0, Greq = 0;
-
-		if(bldg.compareTo(UnitTypes.Terran_Academy) == 0){
-			Mreq = 150;
-			Greq = 0;
-		} else if (bldg.compareTo(UnitTypes.Terran_Armory) == 0) {
-			Mreq = 100;
-			Greq = 50;
-		} else if (bldg.compareTo(UnitTypes.Terran_Barracks) == 0) {
-			Mreq = 150;
-			Greq = 0;
-		} else if (bldg.compareTo(UnitTypes.Terran_Bunker) == 0) {
-			Mreq = 100;
-			Greq = 0;
-		} else if (bldg.compareTo(UnitTypes.Terran_Comsat_Station) == 0) {
-			Mreq = 50;
-			Greq = 50;
-		} else if (bldg.compareTo(UnitTypes.Terran_Control_Tower) == 0) {
-			Mreq = 50;
-			Greq = 50;
-		} else if (bldg.compareTo(UnitTypes.Terran_Covert_Ops) == 0) {			
-			Mreq = 50;
-		    Greq = 50;
-		} else if (bldg.compareTo(UnitTypes.Terran_Engineering_Bay) == 0) {
-			Mreq = 125;
-			Greq = 0;
-		} else if (bldg.compareTo(UnitTypes.Terran_Factory) == 0) {
-			Mreq = 200;
-			Greq = 100;
-		} else if (bldg.compareTo(UnitTypes.Terran_Machine_Shop) == 0) {
-			Mreq = 50;
-			Greq = 50;
-		} else if (bldg.compareTo(UnitTypes.Terran_Missile_Turret) == 0) {			
-			Mreq = 75;
-		    Greq = 0;
-		} else if (bldg.compareTo(UnitTypes.Terran_Nuclear_Silo) == 0) {
-			Mreq = 100;
-			Greq = 100;
-		} else if (bldg.compareTo(UnitTypes.Terran_Physics_Lab) == 0) {			
-			Mreq = 50;
-		    Greq = 50;
-		} else if (bldg.compareTo(UnitTypes.Terran_Refinery) == 0) {
-			Mreq = 100;
-			Greq = 0;
-		} else if (bldg.compareTo(UnitTypes.Terran_Science_Facility) == 0) {
-			Mreq = 100;
-			Greq = 150;
-		} else if (bldg.compareTo(UnitTypes.Terran_Starport) == 0) {
-			Mreq = 150;
-			Greq = 100;
-		} else if (bldg.compareTo(UnitTypes.Terran_Supply_Depot) == 0) {
-			Mreq = 100;
-			Greq = 0;
-		}
-
-			// Check if we have enough minerals,
-		if (bwapi.getSelf().getMinerals() >= Mreq && bwapi.getSelf().getGas() >= Greq) {
-			// try to find the worker near our home position
-			int worker = getNearestUnit(UnitTypes.Terran_SCV.ordinal(), homePositionX, homePositionY);
-			if (worker != -1) {
-				// if we found him, try to select appropriate build tile position for bldg (near our home base close to similar structures)
-				int xtile = homePositionX, ytile = homePositionY;
-				
-				for(Unit unit : bwapi.getMyUnits()) {
-					if(unit.getTypeID() == bldg.ordinal()) {
-						xtile = unit.getX();
-						ytile = unit.getY();
-						break;
-					}
-				}
-				   Point buildTile = getBuildTile(worker, bldg.ordinal(), xtile, ytile);
-				// if we found a good build position, and we aren't already constructing a bldg 
-				// order our worker to build it
-				if ((buildTile.x != -1) && (!weAreBuilding(bldg.ordinal()))) {
-					bwapi.build(worker, buildTile.x, buildTile.y, bldg.ordinal());
+        // input: upgrade(UpgradeTypes.UPGRADE.ordinal()) where UPGRADE is the upgrade type
+        // method will do resource check before attempting upgrade
+        // so far, will only upgrade at base price
+	public void upgrade(int lvlup) {
+		UpgradeType gear = bwapi.getUpgradeType(lvlup);
+		
+		if(bwapi.getSelf().getMinerals() >= gear.getMineralPriceBase() && bwapi.getSelf().getGas() >= gear.getGasPriceBase()) {
+			for(Unit unit : bwapi.getMyUnits()) {
+				if(unit.getTypeID() == gear.getWhatUpgradesTypeID()) {
+					bwapi.upgrade(unit.getID(), gear.getID());
 				}
 			}
 		}
-		else {
-			// report insufficient resources
+	}
+
+        // input: TechTypes.TECHNOLOGY.ordinal() where TECHNOLOGY is the tech to research
+        // method will do resource check before attempting research
+	public void research(int item) {
+		TechType tech = bwapi.getTechType(item);
+		
+		if(bwapi.getSelf().getMinerals() >= tech.getMineralPrice() && bwapi.getSelf().getGas() >= tech.getGasPrice()) {
+			for(Unit unit : bwapi.getMyUnits()) {
+				if(unit.getTypeID() == tech.getWhatResearchesTypeID()) {
+					bwapi.research(unit.getID(), tech.getID());
+				}
+			}
+		}
+	}
+	
+        // input: build(UnitTypes.BUILDING.ordinal()) where BUILDING is the building to build
+        // will build near similar building types
+        // will also build add-ons (not sure if structure will attempt relocating if there's not enough room)
+	public void build(int structure) {
+		UnitType bldg = bwapi.getUnitType(structure);
+		
+		if (bwapi.getSelf().getMinerals() >= bldg.getMineralPrice() && bwapi.getSelf().getGas() >= bldg.getGasPrice()) {
+			if(bldg.isAddon()) {
+				//find parent structure
+				for(Unit unit : bwapi.getMyUnits()) {
+					if(unit.getTypeID() == bldg.getWhatBuildID()) {
+						bwapi.buildAddon(unit.getID(), bldg.getID());
+						break;
+					}
+				}
+				
+			} else {
+			// try to find the worker near our home position
+				int worker = getNearestUnit(UnitTypes.Terran_SCV.ordinal(), homePositionX, homePositionY);
+				if (worker != -1) {
+				// if we found him, try to select appropriate build tile position for bldg (near our home base)
+					int xtile = homePositionX, ytile = homePositionY;
+				
+					for(Unit unit : bwapi.getMyUnits()) {
+						if(unit.getTypeID() == bldg.getID()) {
+							xtile = unit.getX();
+							ytile = unit.getY();
+							break;
+						}
+					}
+				    Point buildTile = getBuildTile(worker, bldg.getID(), xtile, ytile);
+				    // if we found a good build position, and we aren't already constructing a bldg 
+				    // order our worker to build it
+				    if ((buildTile.x != -1) && (!weAreBuilding(bldg.getID()))) {
+				    	bwapi.build(worker, buildTile.x, buildTile.y, bldg.getID());
+				    }
+				}
+			}
 		}
 	}
 
