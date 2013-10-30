@@ -16,11 +16,11 @@ public class core_reactive {
 	JNIBWAPI bwapi;
 	build_manager builder;
 	
-	//Data strucst
+	//Data structs
 	LinkedList<UnitTypes> core_econ_buildingStack;
 	LinkedList<UnitTypes> core_econ_unitsStack;
 	LinkedList<BuildAlert> core_econ_buildAlerts;
-	//BuildMode core_econ_buildMode;
+
 	BuildMode core_econ_buildingMode;
 	BuildMode core_econ_unitsMode;
 	
