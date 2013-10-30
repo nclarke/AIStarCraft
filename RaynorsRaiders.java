@@ -1,4 +1,4 @@
-package javabot;
+package javabot.AIStarCraft;
 
 /**
  * Example of a Java AI Client that does nothing.
@@ -6,6 +6,7 @@ package javabot;
 import java.awt.Point;
 import javabot.model.*;
 import javabot.types.*;
+import javabot.*;
 import javabot.types.OrderType.OrderTypeTypes;
 import javabot.types.UnitType.UnitTypes;
 import javabot.util.BWColor;
