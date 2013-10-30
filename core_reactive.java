@@ -34,17 +34,18 @@ public class core_reactive {
 	};
 	
 	/* Here is our constructor */
-	public core_reactive(JNIBWAPI d_bwapi, build_manager d_builder) {
-		bwapi = d_bwapi;
-		builder = d_builder;
-		
+	public core_reactive() {
 		core_econ_buildingStack = new LinkedList<UnitTypes>();
 		core_econ_unitsStack = new LinkedList<UnitTypes>();
 		
 		// Set default build mode to process everything in the stack in-order and normally
 		core_econ_buildingMode = BuildMode.BLOCKING_STACK;
 		core_econ_unitsMode = BuildMode.FIRST_POSSIBLE;
-		
+	}
+	
+	public void AI_link_core_reactive(JNIBWAPI d_bwapi, build_manager d_builder) {
+		bwapi = d_bwapi;
+		builder = d_builder;
 	}
 	
 	/* This is to be run during startup, currently its a basic loadout of units to create */
