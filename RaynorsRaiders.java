@@ -73,6 +73,7 @@ public class RaynorsRaiders implements BWAPIEventListener {
 		// Call actions every 30 frames
 		if (bwapi.getFrameCount() % 30 == 0) {
 			ai_core.checkUp();
+			ai_builder.construct();
 		}
 	}
 	public void gameEnded() { }

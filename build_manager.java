@@ -48,7 +48,7 @@ public class build_manager {
 			if (cc == -1) cc = getNearestUnit(UnitTypes.Protoss_Nexus.ordinal(), 0, 0);
 			homePositionX = bwapi.getUnit(cc).getX();
 			homePositionY = bwapi.getUnit(cc).getY();
-		}	
+		}
 	}
 	
 	// looks for a building to construct according to the build mode
