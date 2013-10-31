@@ -1,13 +1,19 @@
 package javabot.AIStarCraft;
 
 import java.awt.Point;
+import java.util.LinkedList;
 
 import javabot.JNIBWAPI;
 import javabot.model.Unit;
+import javabot.types.TechType;
+import javabot.types.TechType.TechTypes;
 import javabot.types.UnitType;
 import javabot.types.UnitType.UnitTypes;
+import javabot.types.UpgradeType;
 import javabot.types.UpgradeType.UpgradeTypes;
 import javabot.util.BWColor;
+import javabot.AIStarCraft.core_reactive.*;
+
 // Cannot import core reactive, primary and secondary constructors will init the AI core communication
 
 public class build_manager {
@@ -16,6 +22,9 @@ public class build_manager {
 	core_reactive core;
 	core_reactive.BuildMode mode;
 	LinkedList<UnitTypes> orders;
+	
+	int homePositionX;
+	int homePositionY;
 	
 	public build_manager() {
 		//SET UP ALL INTERNAL VARIABLES HERE
@@ -27,22 +36,25 @@ public class build_manager {
 		// been created.
 		bwapi = d_bwapi;
 		core = d_core;
+		mode = core.econ_getBuildingMode();
+		orders = core.econ_getBuildingStack();
 	}
 	
 	
 	public void construct() {
-		mode = core.econ_getBuildingMode();
-		orders = core.econ_getBuildingStack();
+		
 		
 		switch(mode) {
-			case BuildMode.FIRST_POSSIBLE:
+			case FIRST_POSSIBLE:
 				int i = 0;
 				boolean canBuild = false;
+				UnitTypes b = null;
+				UnitType bldg = null;
 				
 				// go through list until we find a buildable structure
 				while(!canBuild){
-					UnitTypes b = orders.get(i);
-					UnitType bldg = bwapi.getUnitType(b.ordinal());
+					b = orders.get(i);
+					bldg = bwapi.getUnitType(b.ordinal());
 					
 					if(bwapi.getSelf().getMinerals() < bldg.getMineralPrice() && bwapi.getSelf().getGas() < bldg.getGasPrice()) {
 						i++;
@@ -56,17 +68,22 @@ public class build_manager {
 				orders.remove(i);
 				
 				break;
-			case BuildMode.BLOCKING_STACK:
-				UnitTypes b = orders.pop();
-				UnitType bldg = bwapi.getUnitType(b.ordinal());
+			case BLOCKING_STACK:
+				b = orders.pop();
+				bldg = bwapi.getUnitType(b.ordinal());
 				
-				while(bwapi.getSelf().getMinerals() < bldg.getMineralPrice() && bwapi.getSelf().getGas() < bldg.getGasPrice()) {
+				if(bwapi.getSelf().getMinerals() < bldg.getMineralPrice() && bwapi.getSelf().getGas() < bldg.getGasPrice()) {
 					//wait...
 				}
+				else {
+					build(b);
+				}
 				
-				build(b);
+
 				break;
-			case BuildMode.HOLD_ALL:
+			case HOLD_ALL:
+				break;
+			default:
 				break;
 		}
 	}
@@ -76,7 +93,13 @@ public class build_manager {
         // will build near similar building types
         // will also build add-ons (not sure if structure will attempt relocating if there's not enough room)
 	public void build(UnitTypes structure) {
-		UnitType bldg = bwapi.getUnitType(structure.ordinal());
+		UnitType bldg;
+		
+		if (structure == null) {
+			return;
+		}
+		
+		bldg = bwapi.getUnitType(structure.ordinal());
 		
 		if (bwapi.getSelf().getMinerals() >= bldg.getMineralPrice()) {
 		  if(bwapi.getSelf().getGas() >= bldg.getGasPrice()) {
@@ -111,7 +134,7 @@ public class build_manager {
 				    }
 				}
 				else {
-					core.core_econ_buildAlerts.push(BuildAlter.NO_WORKERS);
+					core.core_econ_buildAlerts.push(BuildAlert.NO_WORKERS);
 				}
 			}
 		  }
