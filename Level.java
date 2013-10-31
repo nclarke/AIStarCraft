@@ -1,4 +1,4 @@
-package javabot;
+package javabot.AIStarCraft;
 
 public enum Level {
 	
