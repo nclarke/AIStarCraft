@@ -12,6 +12,11 @@ import javabot.util.BWColor;
 
 public class build_manager {
 	
+	JNIBWAPI bwapi;
+	core_reactive core;
+	core_reactive.BuildMode mode;
+	LinkedList<UnitTypes> orders;
+	
 	public build_manager() {
 		//SET UP ALL INTERNAL VARIABLES HERE
 	}
@@ -20,8 +25,52 @@ public class build_manager {
 		//Here you get your pointers to the other AI cores (JINBWAPI, core, ect ect ect)
 		//The Raynons Raiders code should call this "constructor" after all the other AI parts have
 		// been created.
-		
+		bwapi = d_bwapi;
+		core = d_core;
 	}
+	
+	
+	public void construct() {
+		mode = core.econ_getBuildingMode();
+		orders = core.econ_getBuildingStack();
+		
+		switch(mode) {
+			case BuildMode.FIRST_POSSIBLE:
+				int i = 0;
+				boolean canBuild = false;
+				
+				// go through list until we find a buildable structure
+				while(!canBuild){
+					UnitTypes b = orders.get(i);
+					UnitType bldg = bwapi.getUnitType(b.ordinal());
+					
+					if(bwapi.getSelf().getMinerals() < bldg.getMineralPrice() && bwapi.getSelf().getGas() < bldg.getGasPrice()) {
+						i++;
+					}
+					else {
+						canBuild = true;
+					}
+				}
+				
+				build(b);
+				orders.remove(i);
+				
+				break;
+			case BuildMode.BLOCKING_STACK:
+				UnitTypes b = orders.pop();
+				UnitType bldg = bwapi.getUnitType(b.ordinal());
+				
+				while(bwapi.getSelf().getMinerals() < bldg.getMineralPrice() && bwapi.getSelf().getGas() < bldg.getGasPrice()) {
+					//wait...
+				}
+				
+				build(b);
+				break;
+			case BuildMode.HOLD_ALL:
+				break;
+		}
+	}
+	
 	
         // input: build(UnitTypes.xxxx) 
         // will build near similar building types
@@ -29,7 +78,8 @@ public class build_manager {
 	public void build(UnitTypes structure) {
 		UnitType bldg = bwapi.getUnitType(structure.ordinal());
 		
-		if (bwapi.getSelf().getMinerals() >= bldg.getMineralPrice() && bwapi.getSelf().getGas() >= bldg.getGasPrice()) {
+		if (bwapi.getSelf().getMinerals() >= bldg.getMineralPrice()) {
+		  if(bwapi.getSelf().getGas() >= bldg.getGasPrice()) {
 			if(bldg.isAddon()) {
 				//find parent structure
 				for(Unit unit : bwapi.getMyUnits()) {
@@ -60,10 +110,17 @@ public class build_manager {
 				    	bwapi.build(worker, buildTile.x, buildTile.y, bldg.getID());
 				    }
 				}
+				else {
+					core.core_econ_buildAlerts.push(BuildAlter.NO_WORKERS);
+				}
 			}
+		  }
+		  else {
+			  core.core_econ_buildAlerts.push(BuildAlert.NO_GAS);
+		  }
 		}
 		else {
-			// report insufficient resources
+			core.core_econ_buildAlerts.push(BuildAlert.NO_MINERALS);
 		}
 	}
 
@@ -73,7 +130,8 @@ public class build_manager {
 	public void upgrade(UpgradeTypes lvlup) {
 		UpgradeType gear = bwapi.getUpgradeType(lvlup.ordinal());
 	
-		if(bwapi.getSelf().getMinerals() >= gear.getMineralPriceBase() && bwapi.getSelf().getGas() >= gear.getGasPriceBase()) {
+		if(bwapi.getSelf().getMinerals() >= gear.getMineralPriceBase()) {
+		  if(bwapi.getSelf().getGas() >= gear.getGasPriceBase()) {
 			for(Unit unit : bwapi.getMyUnits()) {
 				if(unit.getTypeID() == gear.getWhatUpgradesTypeID()) {
 					bwapi.upgrade(unit.getID(), gear.getID());
@@ -81,8 +139,12 @@ public class build_manager {
 			}
 		}
 		else {
-			// report insufficient resources
+			core.core_econ_buildAlerts.push(BuildAlert.NO_GAS);
 		}
+	 }
+	 else {
+		 core.core_econ_buildAlerts.push(BuildAlert.NO_MINERALS);
+	 }
 	}
 
    // input: research(TechTypes.xxxx)
@@ -90,15 +152,21 @@ public class build_manager {
 	public void research(TechTypes item) {
 		TechType tech = bwapi.getTechType(item.ordinal());
 	
-		if(bwapi.getSelf().getMinerals() >= tech.getMineralPrice() && bwapi.getSelf().getGas() >= tech.getGasPrice()) {
+		if(bwapi.getSelf().getMinerals() >= tech.getMineralPrice()) {
+		  if(bwapi.getSelf().getGas() >= tech.getGasPrice()) {
+		
 			for(Unit unit : bwapi.getMyUnits()) {
 				if(unit.getTypeID() == tech.getWhatResearchesTypeID()) {
 					bwapi.research(unit.getID(), tech.getID());
 				}
 			}
-		}
+		  }
+		  else {
+				core.core_econ_buildAlerts.push(BuildAlert.NO_GAS);
+		  }
+	    }
 		else {
-			// report insufficient resources
+			 core.core_econ_buildAlerts.push(BuildAlert.NO_MINERALS);
 		}
 	}
 
