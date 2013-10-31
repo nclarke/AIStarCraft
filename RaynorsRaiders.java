@@ -43,7 +43,8 @@ public class RaynorsRaiders implements BWAPIEventListener {
 	
 	public void connected() {
 		bwapi.loadTypeData();
-	}	
+	}
+	
 	public void gameStarted() {
 		System.out.println("Game Started");
 
@@ -59,6 +60,11 @@ public class RaynorsRaiders implements BWAPIEventListener {
 	}
 	public void gameUpdate() 
 	{
+		// This sets up the base location
+		if (bwapi.getFrameCount() == 1) {
+			ai_builder.captureBaseLocation();
+		}
+		
 		for(Unit u : bwapi.getAllUnits())
 		{
 			bwapi.drawCircle(u.getX(), u.getY(), 5, BWColor.RED, true, false);
