@@ -3,6 +3,6 @@ AIStarCraft
 
 AIStarCraft
 
-Team: Raynor's Raiders
+Team: Reynor's Raiders
 
 
