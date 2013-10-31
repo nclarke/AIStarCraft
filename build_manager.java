@@ -38,12 +38,14 @@ public class build_manager {
 		core = d_core;
 		mode = core.econ_getBuildingMode();
 		orders = core.econ_getBuildingStack();
+		homePositionX = bwapi.getUnit(cc).getX();
+		homePositionY = bwapi.getUnit(cc).getY();
 	}
 	
-	
+	// looks for a building to construct according to the build mode
+	// calls build() method if it finds something to construct
 	public void construct() {
-		
-		
+
 		switch(mode) {
 			case FIRST_POSSIBLE:
 				int i = 0;
@@ -52,7 +54,7 @@ public class build_manager {
 				UnitType bldg = null;
 				
 				// go through list until we find a buildable structure
-				while(!canBuild){
+				while(!canBuild && i < orders.size()){
 					b = orders.get(i);
 					bldg = bwapi.getUnitType(b.ordinal());
 					
@@ -64,24 +66,27 @@ public class build_manager {
 					}
 				}
 				
-				build(b);
-				orders.remove(i);
-				
-				break;
-			case BLOCKING_STACK:
-				b = orders.pop();
-				bldg = bwapi.getUnitType(b.ordinal());
-				
-				if(bwapi.getSelf().getMinerals() < bldg.getMineralPrice() && bwapi.getSelf().getGas() < bldg.getGasPrice()) {
-					//wait...
+				if(canBuild){
+				   build(b);
+				   orders.remove(i);
 				}
 				else {
-					build(b);
+					// could not build anything in stack
 				}
+					
+				break;
+			case BLOCKING_STACK:
+				b = orders.peek();
+				bldg = bwapi.getUnitType(b.ordinal());
 				
+				if(bwapi.getSelf().getMinerals() >= bldg.getMineralPrice() && bwapi.getSelf().getGas() >= bldg.getGasPrice()) {
+					build(b);
+					orders.pop();
+				}
 
 				break;
 			case HOLD_ALL:
+				// does nothing
 				break;
 			default:
 				break;
