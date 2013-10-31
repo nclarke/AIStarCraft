@@ -103,6 +103,17 @@ public class core_reactive {
 		return this.core_econ_buildingMode;
 	}
 	
+	public LinkedList<Unit> gen_findUnits(UnitTypes input) {
+	LinkedList<Unit> listToBuild = new LinkedList<Unit>();
+	UnitType searchFor = bwapi.getUnitType(input.ordinal());
+		for(Unit unit : bwapi.getMyUnits()) {
+			if(unit.getTypeID() == searchFor.getWhatBuildID()) {
+				listToBuild.add(unit);
+			}
+		}
+		return listToBuild;
+	}
+	
 
 	
 }
